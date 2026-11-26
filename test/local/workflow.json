@@ -1,0 +1,356 @@
+{
+	"id": "appruvitLocalTest1",
+	"name": "AppruvIt node local test",
+	"active": false,
+	"nodes": [
+		{
+			"parameters": {
+				"httpMethod": "POST",
+				"path": "appruvit-test",
+				"options": {}
+			},
+			"id": "a0000000-0000-4000-8000-000000000001",
+			"name": "Webhook",
+			"type": "n8n-nodes-base.webhook",
+			"typeVersion": 2,
+			"position": [
+				0,
+				0
+			],
+			"webhookId": "a0000000-0000-4000-8000-0000000000aa"
+		},
+		{
+			"parameters": {
+				"operation": "toBinary",
+				"sourceProperty": "body.file",
+				"options": {
+					"fileName": "فاتورة-quote.pdf",
+					"mimeType": "application/pdf"
+				}
+			},
+			"id": "a0000000-0000-4000-8000-000000000002",
+			"name": "Convert to File",
+			"type": "n8n-nodes-base.convertToFile",
+			"typeVersion": 1.1,
+			"position": [
+				220,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"resource": "approvalRequest",
+				"operation": "sendAndWait",
+				"title": "={{ $('Webhook').item.json.body.scenario }}",
+				"summary": "Local test of the AppruvIt node",
+				"approvers": "tester@example.com",
+				"rule": "any",
+				"options": {
+					"attachments": "data",
+					"bodyContent": "Scenario **{{ $('Webhook').item.json.body.scenario }}**",
+					"bodyFormat": "markdown"
+				}
+			},
+			"id": "a0000000-0000-4000-8000-000000000003",
+			"name": "AppruvIt",
+			"type": "CUSTOM.appruvIt",
+			"typeVersion": 1,
+			"position": [
+				440,
+				0
+			],
+			"webhookId": "a0000000-0000-4000-8000-0000000000bb",
+			"credentials": {
+				"appruvItApi": {
+					"id": "appruvitMockCred1",
+					"name": "AppruvIt mock"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"rules": {
+					"values": [
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-approved",
+										"leftValue": "={{ $json.approved === true && $json.status === 'approved' }}",
+										"rightValue": "",
+										"operator": {
+											"type": "boolean",
+											"operation": "true",
+											"singleValue": true
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Approved"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-rejected",
+										"leftValue": "={{ $json.status ?? '' }}",
+										"rightValue": "rejected",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Rejected"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-expired",
+										"leftValue": "={{ $json.status ?? '' }}",
+										"rightValue": "expired",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Expired"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-cancelled",
+										"leftValue": "={{ $json.status ?? '' }}",
+										"rightValue": "cancelled",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Cancelled"
+						}
+					]
+				},
+				"options": {
+					"fallbackOutput": "extra",
+					"renameFallbackOutput": "Other"
+				}
+			},
+			"id": "b0000000-0000-4000-8000-0000000000c1",
+			"name": "Route decision",
+			"type": "n8n-nodes-base.switch",
+			"typeVersion": 3.2,
+			"position": [
+				660,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"method": "POST",
+				"url": "http://127.0.0.1:5680/report",
+				"sendBody": true,
+				"specifyBody": "json",
+				"jsonBody": "={{ JSON.stringify({ branch: 'approved', scenario: $('Webhook').item.json.body.scenario, json: $json }) }}",
+				"options": {}
+			},
+			"id": "a0000000-0000-4000-8000-000000000010",
+			"name": "Report Approved",
+			"type": "n8n-nodes-base.httpRequest",
+			"typeVersion": 4.2,
+			"position": [
+				900,
+				-320
+			]
+		},
+		{
+			"parameters": {
+				"method": "POST",
+				"url": "http://127.0.0.1:5680/report",
+				"sendBody": true,
+				"specifyBody": "json",
+				"jsonBody": "={{ JSON.stringify({ branch: 'rejected', scenario: $('Webhook').item.json.body.scenario, json: $json }) }}",
+				"options": {}
+			},
+			"id": "a0000000-0000-4000-8000-000000000011",
+			"name": "Report Rejected",
+			"type": "n8n-nodes-base.httpRequest",
+			"typeVersion": 4.2,
+			"position": [
+				900,
+				-160
+			]
+		},
+		{
+			"parameters": {
+				"method": "POST",
+				"url": "http://127.0.0.1:5680/report",
+				"sendBody": true,
+				"specifyBody": "json",
+				"jsonBody": "={{ JSON.stringify({ branch: 'expired', scenario: $('Webhook').item.json.body.scenario, json: $json }) }}",
+				"options": {}
+			},
+			"id": "a0000000-0000-4000-8000-000000000012",
+			"name": "Report Expired",
+			"type": "n8n-nodes-base.httpRequest",
+			"typeVersion": 4.2,
+			"position": [
+				900,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"method": "POST",
+				"url": "http://127.0.0.1:5680/report",
+				"sendBody": true,
+				"specifyBody": "json",
+				"jsonBody": "={{ JSON.stringify({ branch: 'cancelled', scenario: $('Webhook').item.json.body.scenario, json: $json }) }}",
+				"options": {}
+			},
+			"id": "a0000000-0000-4000-8000-000000000013",
+			"name": "Report Cancelled",
+			"type": "n8n-nodes-base.httpRequest",
+			"typeVersion": 4.2,
+			"position": [
+				900,
+				160
+			]
+		},
+		{
+			"parameters": {
+				"method": "POST",
+				"url": "http://127.0.0.1:5680/report",
+				"sendBody": true,
+				"specifyBody": "json",
+				"jsonBody": "={{ JSON.stringify({ branch: 'other', scenario: $('Webhook').item.json.body.scenario, json: $json }) }}",
+				"options": {}
+			},
+			"id": "a0000000-0000-4000-8000-000000000014",
+			"name": "Report Other",
+			"type": "n8n-nodes-base.httpRequest",
+			"typeVersion": 4.2,
+			"position": [
+				900,
+				320
+			]
+		}
+	],
+	"connections": {
+		"Webhook": {
+			"main": [
+				[
+					{
+						"node": "Convert to File",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Convert to File": {
+			"main": [
+				[
+					{
+						"node": "AppruvIt",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"AppruvIt": {
+			"main": [
+				[
+					{
+						"node": "Route decision",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Route decision": {
+			"main": [
+				[
+					{
+						"node": "Report Approved",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Report Rejected",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Report Expired",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Report Cancelled",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Report Other",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"settings": {
+		"executionOrder": "v1"
+	},
+	"pinData": {}
+}

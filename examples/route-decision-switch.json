@@ -1,0 +1,122 @@
+{
+	"nodes": [
+		{
+			"parameters": {
+				"rules": {
+					"values": [
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-approved",
+										"leftValue": "={{ $json.approved === true && $json.status === 'approved' }}",
+										"rightValue": "",
+										"operator": {
+											"type": "boolean",
+											"operation": "true",
+											"singleValue": true
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Approved"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-rejected",
+										"leftValue": "={{ $json.status ?? '' }}",
+										"rightValue": "rejected",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Rejected"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-expired",
+										"leftValue": "={{ $json.status ?? '' }}",
+										"rightValue": "expired",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Expired"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-cancelled",
+										"leftValue": "={{ $json.status ?? '' }}",
+										"rightValue": "cancelled",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Cancelled"
+						}
+					]
+				},
+				"options": {
+					"fallbackOutput": "extra",
+					"renameFallbackOutput": "Other"
+				}
+			},
+			"id": "b0000000-0000-4000-8000-0000000000c1",
+			"name": "Route decision",
+			"type": "n8n-nodes-base.switch",
+			"typeVersion": 3.2,
+			"position": [
+				660,
+				0
+			]
+		}
+	],
+	"connections": {}
+}

@@ -1,0 +1,18 @@
+{
+	"node": "n8n-nodes-appruvit.appruvIt",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Productivity"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://appruvit.com/docs/n8n"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://appruvit.com/docs/n8n"
+			}
+		]
+	}
+}

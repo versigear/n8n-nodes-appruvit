@@ -1,0 +1,297 @@
+{
+	"id": "appruvitSwitchCheck1",
+	"name": "AppruvIt Switch check",
+	"active": false,
+	"nodes": [
+		{
+			"parameters": {},
+			"id": "c0000000-0000-4000-8000-000000000001",
+			"name": "Manual Trigger",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [
+				0,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"mode": "raw",
+				"jsonOutput": "{\"cases\": [{\"case\": \"empty item (input passed through)\"}, {\"case\": \"string approved\", \"status\": \"approved\", \"approved\": \"true\"}, {\"case\": \"approved without flag\", \"status\": \"approved\"}, {\"case\": \"real approval\", \"status\": \"approved\", \"approved\": true}, {\"case\": \"rejected\", \"status\": \"rejected\", \"approved\": false}, {\"case\": \"expired\", \"status\": \"expired\", \"approved\": false}, {\"case\": \"cancelled\", \"status\": \"cancelled\", \"approved\": false}]}",
+				"options": {}
+			},
+			"id": "c0000000-0000-4000-8000-000000000002",
+			"name": "Cases",
+			"type": "n8n-nodes-base.set",
+			"typeVersion": 3.4,
+			"position": [
+				220,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"fieldToSplitOut": "cases",
+				"options": {}
+			},
+			"id": "c0000000-0000-4000-8000-000000000003",
+			"name": "Split Out",
+			"type": "n8n-nodes-base.splitOut",
+			"typeVersion": 1,
+			"position": [
+				440,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"rules": {
+					"values": [
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-approved",
+										"leftValue": "={{ $json.approved === true && $json.status === 'approved' }}",
+										"rightValue": "",
+										"operator": {
+											"type": "boolean",
+											"operation": "true",
+											"singleValue": true
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Approved"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-rejected",
+										"leftValue": "={{ $json.status ?? '' }}",
+										"rightValue": "rejected",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Rejected"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-expired",
+										"leftValue": "={{ $json.status ?? '' }}",
+										"rightValue": "expired",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Expired"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "appruvit-cancelled",
+										"leftValue": "={{ $json.status ?? '' }}",
+										"rightValue": "cancelled",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Cancelled"
+						}
+					]
+				},
+				"options": {
+					"fallbackOutput": "extra",
+					"renameFallbackOutput": "Other"
+				}
+			},
+			"id": "b0000000-0000-4000-8000-0000000000c1",
+			"name": "Route decision",
+			"type": "n8n-nodes-base.switch",
+			"typeVersion": 3.2,
+			"position": [
+				660,
+				0
+			]
+		},
+		{
+			"parameters": {},
+			"id": "c0000000-0000-4000-8000-000000000010",
+			"name": "Approved",
+			"type": "n8n-nodes-base.noOp",
+			"typeVersion": 1,
+			"position": [
+				900,
+				-320
+			]
+		},
+		{
+			"parameters": {},
+			"id": "c0000000-0000-4000-8000-000000000011",
+			"name": "Rejected",
+			"type": "n8n-nodes-base.noOp",
+			"typeVersion": 1,
+			"position": [
+				900,
+				-160
+			]
+		},
+		{
+			"parameters": {},
+			"id": "c0000000-0000-4000-8000-000000000012",
+			"name": "Expired",
+			"type": "n8n-nodes-base.noOp",
+			"typeVersion": 1,
+			"position": [
+				900,
+				0
+			]
+		},
+		{
+			"parameters": {},
+			"id": "c0000000-0000-4000-8000-000000000013",
+			"name": "Cancelled",
+			"type": "n8n-nodes-base.noOp",
+			"typeVersion": 1,
+			"position": [
+				900,
+				160
+			]
+		},
+		{
+			"parameters": {},
+			"id": "c0000000-0000-4000-8000-000000000014",
+			"name": "Other",
+			"type": "n8n-nodes-base.noOp",
+			"typeVersion": 1,
+			"position": [
+				900,
+				320
+			]
+		}
+	],
+	"connections": {
+		"Manual Trigger": {
+			"main": [
+				[
+					{
+						"node": "Cases",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Cases": {
+			"main": [
+				[
+					{
+						"node": "Split Out",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Split Out": {
+			"main": [
+				[
+					{
+						"node": "Route decision",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Route decision": {
+			"main": [
+				[
+					{
+						"node": "Approved",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Rejected",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Expired",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Cancelled",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Other",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"settings": {
+		"executionOrder": "v1"
+	},
+	"pinData": {}
+}
